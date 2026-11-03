@@ -3,7 +3,6 @@ package unioeste.geral.endereco.manager;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import connection.ConexaoBD;
-import unioeste.geral.endereco.*;
 import unioeste.geral.endereco.col.CidadeCol;
 import unioeste.geral.endereco.col.EnderecoCol;
 import unioeste.geral.endereco.dao.CidadeDAO;
