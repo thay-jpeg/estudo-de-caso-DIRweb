@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController // classe responde a requisições Web/JSON
 @RequestMapping("/api/contribuintes")
 @CrossOrigin(origins = "http://localhost:5173") // libera o acesso
-public class ContribuinteAPI {
+public class ContribuinteController {
 
     private final ContribuinteManager manager;
 
-    public ContribuinteAPI(ContribuinteManager manager) {
+    public ContribuinteController(ContribuinteManager manager) {
         this.manager = manager;
     }
 
