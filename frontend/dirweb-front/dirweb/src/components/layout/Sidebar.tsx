@@ -1,9 +1,11 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { CircleDollarSign, FileCheck2, House, Landmark, LogOut, User, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useAuthStore } from '@/store/useAuthStore'
+import { useDeclaracaoStore } from '@/store/useDeclaracaoStore'
 
 const itens: { to: string; label: string; Icon: LucideIcon }[] = [
-  { to: '/', label: 'Início', Icon: House },
+  { to: '/home', label: 'Início', Icon: House },
   { to: '/dados-contribuinte', label: 'Dados do Contribuinte', Icon: User },
   { to: '/dependentes', label: 'Dependentes', Icon: Users },
   { to: '/rendimentos', label: 'Rendimentos', Icon: CircleDollarSign },
@@ -15,6 +17,11 @@ const row = 'flex items-center gap-4 rounded-lg px-5 py-3.5 text-[0.9375rem] tra
 
 export default function Sidebar() {
   const navigate = useNavigate()
+  const sair = () => {
+    useAuthStore.getState().logout() // limpa sessão/token
+    useDeclaracaoStore.getState().reset()
+    navigate('/login', { replace: true })
+  }
   return (
     <aside className="flex w-60 shrink-0 flex-col rounded-xl bg-brand-soft p-2 lg:w-64">
       <nav className="flex flex-col gap-1">
@@ -22,7 +29,7 @@ export default function Sidebar() {
           <NavLink
             key={to}
             to={to}
-            end={to === '/'}
+            end
             className={({ isActive }) => `${row} ${isActive ? 'bg-brand text-white' : 'bg-brand-soft text-brand hover:bg-[#e4e9fb]'}`}
           >
             <Icon className="h-5 w-5 shrink-0" />
@@ -31,7 +38,7 @@ export default function Sidebar() {
         ))}
       </nav>
       <div className="mx-4 my-3 mt-auto h-1 rounded-full bg-[#dde1f4]" />
-      <button type="button" onClick={() => navigate('/')} className={`${row} text-left text-brand hover:bg-[#e4e9fb]`}>
+      <button type="button" onClick={sair} className={`${row} text-left text-brand hover:bg-[#e4e9fb]`}>
         <LogOut className="h-5 w-5 shrink-0" />
         <span>Sair do Sistema</span>
       </button>

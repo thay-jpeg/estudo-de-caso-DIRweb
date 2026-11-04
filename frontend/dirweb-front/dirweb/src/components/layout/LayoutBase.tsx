@@ -6,13 +6,14 @@ import Footer from './Footer'
 import Toast from '@/components/ui/Toast'
 import { declaracaoService } from '@/services/declaracaoService'
 import { useDeclaracaoStore } from '@/store/useDeclaracaoStore'
+import { useAuthStore } from '@/store/useAuthStore'
 
 export default function LayoutBase() {
   useEffect(() => {
     const s = useDeclaracaoStore.getState()
     if (s.carregado) return
     declaracaoService
-      .carregarDeclaracao()
+      .carregarDeclaracao(useAuthStore.getState().usuario?.loginCpf)
       .then((d) => s.hydrate(d))
       .catch(() => s.showToast('Erro ao carregar a declaração.', 'error'))
   }, [])

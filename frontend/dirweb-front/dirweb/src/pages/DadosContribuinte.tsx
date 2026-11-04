@@ -10,6 +10,7 @@ import { SEXOS, UFS, contribuinteSchema } from '@/types'
 import type { ContribuinteSchema } from '@/types'
 import { declaracaoService } from '@/services/declaracaoService'
 import { useDeclaracaoStore } from '@/store/useDeclaracaoStore'
+import { useAuthStore } from '@/store/useAuthStore'
 import { maskCEP, maskCPF, maskTelefone } from '@/utils/masks'
 
 export default function DadosContribuinte() {
@@ -23,7 +24,11 @@ export default function DadosContribuinte() {
     resolver: zodResolver(contribuinteSchema),
   })
 
-  useEffect(() => { if (contribuinte) reset(contribuinte) }, [contribuinte, reset])
+  const usuario = useAuthStore((s) => s.usuario)
+  useEffect(() => {
+    if (contribuinte) reset(contribuinte)
+    else if (usuario) reset({ Nome: usuario.nome, Sobrenome: usuario.sobrenome, CPF: usuario.loginCpf })
+  }, [contribuinte, usuario, reset])
 
   const onSubmit = async (data: ContribuinteSchema) => {
     try {

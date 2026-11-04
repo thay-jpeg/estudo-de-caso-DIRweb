@@ -1,6 +1,6 @@
 package unioeste.casestudy.irpf.bo;
 
-import unioeste.apoio.db.bo.PessoaFisica;
+import unioeste.apoio.bd.bo.PessoaFisica;
 
 public class Contribuinte {
     

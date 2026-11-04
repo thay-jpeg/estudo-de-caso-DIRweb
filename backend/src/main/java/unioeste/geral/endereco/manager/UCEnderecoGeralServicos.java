@@ -2,11 +2,19 @@ package unioeste.geral.endereco.manager;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import connection.ConexaoBD;
+import unioeste.apoio.bd.ConexaoBD;
+import unioeste.geral.endereco.bo.Endereco;
+import unioeste.geral.endereco.bo.EnderecoEspecifico;
+import unioeste.geral.endereco.bo.UF;
+import unioeste.geral.endereco.bo.Cidade;
+import unioeste.geral.endereco.bo.Logradouro;
+import unioeste.geral.endereco.bo.Bairro;
+import unioeste.geral.endereco.bo.TipoLogradouro;
 import unioeste.geral.endereco.col.CidadeCol;
 import unioeste.geral.endereco.col.EnderecoCol;
 import unioeste.geral.endereco.dao.CidadeDAO;
 import unioeste.geral.endereco.dao.EnderecoDAO;
+
 
 import java.net.URI;
 import java.net.http.HttpClient;

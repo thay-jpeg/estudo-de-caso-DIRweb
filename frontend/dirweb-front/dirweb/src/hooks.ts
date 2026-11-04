@@ -1,6 +1,18 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { declaracaoService } from '@/services/declaracaoService'
+import { useAuthStore } from '@/store/useAuthStore'
 import { useDeclaracaoStore, validarDeclaracao } from '@/store/useDeclaracaoStore'
+
+/** Encerra a sessão (token/estado) e volta ao Step 1 do login. */
+export function useSair() {
+  const navigate = useNavigate()
+  return () => {
+    useAuthStore.getState().logout()
+    useDeclaracaoStore.getState().reset()
+    navigate('/login', { replace: true })
+  }
+}
 
 /** Ação única de envio (usada pelo botão do Início e pelo do Resumo). */
 export function useEnviarDeclaracao() {

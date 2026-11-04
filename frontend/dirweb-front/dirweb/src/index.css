@@ -5,3 +5,7 @@
 html { font-size: 90%; }
 html, body, #root { height: 100%; }
 body { @apply bg-white text-brand font-sans antialiased; }
+
+/* Remove o botão nativo de revelar senha (Edge/IE) — usamos o nosso ícone de olho */
+input::-ms-reveal, input::-ms-clear { display: none; }
+input[type='password']::-webkit-credentials-auto-fill-button { visibility: hidden; position: absolute; right: 0; }

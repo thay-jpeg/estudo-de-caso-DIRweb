@@ -1,13 +1,9 @@
 package unioeste.casestudy.irpf.api;
 
+import io.javalin.Javalin;
 import unioeste.casestudy.irpf.bo.Contribuinte;
 import unioeste.casestudy.irpf.manager.ContribuinteManager;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-@RestController // classe responde a requisições Web/JSON
-@RequestMapping("/api/contribuintes")
-@CrossOrigin(origins = "http://localhost:5173") // libera o acesso
 public class ContribuinteController {
 
     private final ContribuinteManager manager;
@@ -16,15 +12,15 @@ public class ContribuinteController {
         this.manager = manager;
     }
 
-    @PostMapping
-    public ResponseEntity<?> cadastrar(@RequestBody Contribuinte contribuinte) {
-        try {
-            // camada de negócio
-            Contribuinte salvo = manager.salvarContribuinte(contribuinte);
-            return ResponseEntity.ok(salvo);
-        } catch (Exception e) {
-            // se o CPF for inválido, devolve erro 400 (Bad Request) para o React exibir o Toast vermelho
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public void registrarRotas(Javalin app) {
+        app.post("/api/contribuintes", ctx -> {
+            try {
+                Contribuinte contribuinte = ctx.bodyAsClass(Contribuinte.class);
+                Contribuinte salvo = manager.salvarContribuinte(contribuinte);
+                ctx.status(200).json(salvo);
+            } catch (Exception e) {
+                ctx.status(400).result(e.getMessage());
+            }
+        });
     }
 }

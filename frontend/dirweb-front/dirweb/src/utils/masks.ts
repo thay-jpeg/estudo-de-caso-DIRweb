@@ -23,3 +23,5 @@ export const maskTelefone = (v: string) => {
 
 export const formatBRL = (n: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n)
+
+export const maskCodigo = (v: string) => v.replace(/\D/g, '').slice(0, 6)

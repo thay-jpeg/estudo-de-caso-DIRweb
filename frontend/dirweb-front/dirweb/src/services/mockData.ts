@@ -1,6 +1,5 @@
 import type { Bem, ContribuinteForm, Dependente, Rendimento, TipoBem, TipoDependente } from '@/types'
 
-/** Dados fictícios (seed) — respeitam as regras do Estudo de Caso 3. */
 export const mockContribuinte: ContribuinteForm = {
   Nome: 'Thaynara',
   Sobrenome: 'Nascimento de Jesus',

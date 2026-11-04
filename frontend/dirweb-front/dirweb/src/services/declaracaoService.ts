@@ -3,18 +3,14 @@ import {
   mockBens, mockContribuinte, mockDependentes, mockRendimentos, mockTiposBem, mockTiposDependente,
 } from './mockData'
 
-/**
- * API MOCKING — nenhuma chamada HTTP é feita.
- * Cada função devolve uma Promise resolvida após 500 ms (simula latência de rede).
- * Para integrar com o back-end Java, troque o corpo de cada função por uma chamada
- * `api.get/post(...)` de './api' mantendo as mesmas assinaturas.
- */
+
 const DELAY_MS = 500
 const delay = <T,>(value: T): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(structuredClone(value)), DELAY_MS))
 
-// "Banco" em memória (reinicia ao recarregar a página)
+const CPF_SEED = '12345678909'
 const db = {
+  owner: CPF_SEED,
   contribuinte: structuredClone(mockContribuinte) as ContribuinteForm | null,
   dependentes: structuredClone(mockDependentes),
   rendimentos: structuredClone(mockRendimentos),
@@ -32,15 +28,26 @@ export interface DeclaracaoCompleta {
 }
 
 export const declaracaoService = {
-  carregarDeclaracao: () =>
-    delay<DeclaracaoCompleta>({
+  /** Usuário do seed vê os dados fictícios; qualquer outro CPF (novo cadastro) começa com a declaração vazia. */
+  carregarDeclaracao: (cpf?: string) => {
+    const dono = (cpf ?? CPF_SEED).replace(/\D/g, '')
+    if (db.owner !== dono) {
+      db.owner = dono
+      const seed = dono === CPF_SEED
+      db.contribuinte = seed ? structuredClone(mockContribuinte) : null
+      db.dependentes = seed ? structuredClone(mockDependentes) : []
+      db.rendimentos = seed ? structuredClone(mockRendimentos) : []
+      db.bens = seed ? structuredClone(mockBens) : []
+    }
+    return delay<DeclaracaoCompleta>({
       contribuinte: db.contribuinte,
       dependentes: db.dependentes,
       rendimentos: db.rendimentos,
       bens: db.bens,
       tiposDependente: mockTiposDependente,
       tiposBem: mockTiposBem,
-    }),
+    })
+  },
 
   cadastrarContribuinte: (data: ContribuinteForm) => {
     db.contribuinte = { ...data }

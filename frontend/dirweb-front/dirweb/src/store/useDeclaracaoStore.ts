@@ -14,7 +14,6 @@ export const ETAPAS: { id: EtapaId; label: string; peso: number }[] = [
 export type ToastType = 'success' | 'error'
 
 interface DeclaracaoState {
-  usuarioNome: string
   carregado: boolean
   contribuinte: ContribuinteForm | null
   dependentes: Dependente[]
@@ -35,10 +34,10 @@ interface DeclaracaoState {
   setEnviada: (v: boolean) => void
   showToast: (msg: string, type?: ToastType) => void
   clearToast: () => void
+  reset: () => void
 }
 
 export const useDeclaracaoStore = create<DeclaracaoState>((set) => ({
-  usuarioNome: 'Thaynara Nascimento de Jesus',
   carregado: false,
   contribuinte: null,
   dependentes: [],
@@ -59,6 +58,8 @@ export const useDeclaracaoStore = create<DeclaracaoState>((set) => ({
   setEnviada: (enviada) => set({ enviada }),
   showToast: (msg, type = 'success') => set({ toast: { id: Date.now(), msg, type } }),
   clearToast: () => set({ toast: null }),
+  reset: () =>
+    set({ carregado: false, contribuinte: null, dependentes: [], semDependentes: false, rendimentos: [], bens: [], tiposDependente: [], tiposBem: [], enviada: false }),
 }))
 
 type Snapshot = Pick<DeclaracaoState, 'contribuinte' | 'dependentes' | 'semDependentes' | 'rendimentos' | 'bens' | 'enviada'>
