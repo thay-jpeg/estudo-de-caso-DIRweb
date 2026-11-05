@@ -2,7 +2,6 @@ import type { Endereco } from '../types/models';
 
 const API_BASE_URL = 'http://localhost:8080/api/endereco';
 
-// Interfaces que representam o Objeto Composto retornado/esperado pelo Back-End Java (Pacote BO)
 export interface UFBackendDTO {
   idUF?: number;
   uf: string;
@@ -47,7 +46,6 @@ export interface EnderecoEspecificoBackendDTO {
   complemento?: string;
 }
 
-// Converte o Objeto Composto do Back-End Java para a interface Endereco do Front-End (src/types/models.ts)
 function mapearBackendParaFrontend(dto: EnderecoBackendDTO): Endereco {
   const tipo = dto.logradouro?.tipoLogradouro?.tipoLogradouro?.trim() || '';
   const nomeRua = dto.logradouro?.logradouro?.trim() || '';
@@ -66,7 +64,6 @@ function mapearBackendParaFrontend(dto: EnderecoBackendDTO): Endereco {
   };
 }
 
-// Converte a interface Endereco do Front-End (src/types/models.ts) para o Objeto Composto do Back-End Java
 function mapearFrontendParaBackend(end: Endereco): EnderecoBackendDTO {
   const ruaLimpa = (end.Logradouro || '').trim();
   const partes = ruaLimpa.split(' ');
@@ -98,8 +95,7 @@ function mapearFrontendParaBackend(end: Endereco): EnderecoBackendDTO {
 }
 
 /**
- * 1. Serviço: cadastrarEndereco
- * Envia o endereço preenchido na tela para o Back-End Java validar (incluindo UF pela sigla) e gravar no MySQL.
+ * 1. POST cadastrarEndereco
  */
 export async function cadastrarEndereco(enderecoFront: Endereco): Promise<Endereco> {
   const payload = mapearFrontendParaBackend(enderecoFront);
@@ -112,76 +108,74 @@ export async function cadastrarEndereco(enderecoFront: Endereco): Promise<Endere
 
   const body = await response.json();
   if (!response.ok) {
-    throw new Error(body.mensagem || 'Erro ao cadastrar endereço no servidor.');
+    throw new Error(body.mensagem || 'Endereço inválido para cadastro.');
   }
 
   return mapearBackendParaFrontend(body as EnderecoBackendDTO);
 }
 
 /**
- * 2. Serviço: obterEnderecoPorCEP
- * Busca no banco MySQL a lista de endereços correspondentes a um CEP.
+ * 2. GET obterEnderecoPorCEP (NÃO auto-preenche; lança erro se CEP inválido ou não encontrado no banco)
  */
 export async function obterEnderecoPorCEP(cep: string): Promise<Endereco[]> {
-  const cepLimpo = cep.replace(/\D/g, '');
-  const response = await fetch(`${API_BASE_URL}/obterEnderecoPorCEP/${encodeURIComponent(cepLimpo)}`);
+  const cepLimpo = (cep || '').replace(/\D/g, '');
+  const response = await fetch(`${API_BASE_URL}/obterEnderecoPorCEP/${encodeURIComponent(cepLimpo || 'invalido')}`);
 
   const body = await response.json();
   if (!response.ok) {
-    throw new Error(body.mensagem || 'Erro ao consultar endereço por CEP.');
+    throw new Error(body.mensagem || 'CEP inválido.');
   }
 
-  return (body as EnderecoBackendDTO[]).map(mapearBackendParaFrontend);
+  const lista = (body as EnderecoBackendDTO[]).map(mapearBackendParaFrontend);
+  if (lista.length === 0) {
+    throw new Error('Nenhum endereço encontrado no banco para este CEP.');
+  }
+  return lista;
 }
 
 /**
- * 3. Serviço: obterEnderecoPorID
- * Busca no banco MySQL um endereço específico pelo seu ID.
+ * 3. GET obterEnderecoPorID (NÃO auto-preenche; lança erro se ID inválido ou não encontrado no banco)
  */
 export async function obterEnderecoPorID(idEndereco: number): Promise<Endereco> {
   const response = await fetch(`${API_BASE_URL}/obterEnderecoPorID/${idEndereco}`);
 
   const body = await response.json();
   if (!response.ok) {
-    throw new Error(body.mensagem || 'Erro ao consultar endereço por ID.');
+    throw new Error(body.mensagem || 'ID de endereço inválido ou não encontrado.');
   }
 
   return mapearBackendParaFrontend(body as EnderecoBackendDTO);
 }
 
 /**
- * 4. Serviço: obterEnderecoExterno (ViaCEP via Back-End Java)
- * Dado um CEP digitado no Front-End, retorna os dados do endereço obtidos da nuvem.
+ * 4. GET obterEnderecoExterno (ViaCEP via Back-End: auto-preenche se válido; lança erro para brilhar em vermelho se inválido)
  */
-export async function obterEnderecoExterno(cep: string): Promise<Partial<Endereco> | null> {
-  const cepLimpo = cep.replace(/\D/g, '');
-  if (cepLimpo.length !== 8) {
-    return null;
-  }
+export async function obterEnderecoExterno(cep: string): Promise<Endereco> {
+  const cepLimpo = (cep || '').replace(/\D/g, '');
+  const response = await fetch(`${API_BASE_URL}/obterEnderecoExterno/${encodeURIComponent(cepLimpo || 'invalido')}`);
 
-  const response = await fetch(`${API_BASE_URL}/obterEnderecoExterno/${encodeURIComponent(cepLimpo)}`);
+  const body = await response.json();
   if (!response.ok) {
-    return null;
+    throw new Error(body.mensagem || 'CEP inválido ou não encontrado no serviço externo.');
   }
 
-  const data = (await response.json()) as EnderecoEspecificoBackendDTO;
+  const data = body as EnderecoEspecificoBackendDTO;
   if (!data?.endereco) {
-    return null;
+    throw new Error('Endereço não retornado pelo serviço externo.');
   }
 
   return mapearBackendParaFrontend(data.endereco);
 }
 
 /**
- * 5. Serviço: obterCidade
- * Busca no banco MySQL uma Cidade pelo idCidade já trazendo a UF relacionada.
+ * 5. GET obterCidade (NÃO auto-preenche; lança erro se ID de cidade inválido ou não encontrado)
  */
 export async function obterCidade(idCidade: number): Promise<CidadeBackendDTO> {
   const response = await fetch(`${API_BASE_URL}/obterCidade/${idCidade}`);
 
   const body = await response.json();
   if (!response.ok) {
-    throw new Error(body.mensagem || 'Erro ao consultar cidade.');
+    throw new Error(body.mensagem || 'Cidade inválida ou não encontrada.');
   }
 
   return body as CidadeBackendDTO;
